@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="keywords"
+        content="música, reproducción de música, canciones, artistas, biblioteca musical, música gratis, famosos, plataforma musical, estilos de música, albumes">
+    <meta name="description"
+        content="Descubre millones de canciones en todos los géneros. Crea listas personalizadas, explora nuevas recomendaciones y disfruta de la mejor música en alta calidad.">
+    <title>Reproductor de Música</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+
+<body class="background__imagen">
+    <header class="navbar">
+        <nav class="navbar__nav">
+            <div class="">
+                <form action="index.html" method="get" class="navbar__nav__container__search">
+                    <img src="assets/Lupa.svg" alt="lupa de buscador">
+                    <input type="text" placeholder="Buscar artista, música..." name="q"
+                        class="navbar__nav__container__search__input">
+                </form>
+            </div>
+            <img src="assets/logo.svg" alt="logo del reproductor de música">
+            <Ul class="navbar__nav__list">
+                <li>Listas</li>
+                <li>Canciones</li>
+            </Ul>
+        </nav>
+    </header>
+    <main class="main">
+        <div class="main__container__reproductor">
+            <div class="main__reproductor">
+                <img src="https://api.institutoalfa.org/api/songs/image/7a8f30d89df98f5b7ce751cb37235c2b.jpg"
+                    alt="Cancion de Bedroom, llamada In my head" class="main__reproductor__image" id="image">
+                <div>
+                    <p class="main__reproductor__titulo" id="title-song">In My Head</p>
+                    <p class="main__reproductor__artista" id="author-song">Bedroom</p>
+                </div>
+                <div>
+                    <audio src="https://api.institutoalfa.org/api/songs/audio/2c8644707eb05222a2c3f183b0b00f7d.mp3"
+                        id="audio" autoplay >
+                    </audio>
+                </div>
+                <div class="reproductor__icon">
+                    <img src="assets/Corazon.svg" alt="Botón de favorito">
+                    <img src="assets/Atras.svg" alt="Botón para colocar la canción anterior">
+                    <img src="assets/Pausa.svg" alt="Botón de pausa" id="play">
+                    <img src="assets/Adelante.svg" alt="Botón para colocar la siguiente canción">
+                    <img src="assets/Repetir.svg" alt="Botón para repetir la canción">
+                </div>
+                <button class="main__main__reproductor__button">Compartir</button>
+            </div>
+        </div>
+        <section class="main__card__sections" id="container-song">
+        </section>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
