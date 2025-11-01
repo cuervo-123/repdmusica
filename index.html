@@ -1,64 +1,612 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="keywords"
-        content="música, reproducción de música, canciones, artistas, biblioteca musical, música gratis, famosos, plataforma musical, estilos de música, albumes">
-    <meta name="description"
-        content="Descubre millones de canciones en todos los géneros. Crea listas personalizadas, explora nuevas recomendaciones y disfruta de la mejor música en alta calidad.">
-    <title>Reproductor de Música</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Bapp Radio – 24MB Ready (Worker + Virtual List)</title>
+<style>
+  :root{
+    color-scheme: dark;
+    --bg:#0b0f17; --panel:#111826; --line:#233044; --fg:#e9eef5; --accent:#1f9d57; --muted:#8ea3b0;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--fg);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial}
+  header{display:flex;align-items:center;gap:.75rem;justify-content:space-between;padding:12px 16px;background:var(--panel);border-bottom:1px solid var(--line)}
+  h1{margin:0;font-size:16px}
+  main{max-width:1100px;margin:0 auto;padding:16px;display:grid;grid-template-columns:360px 1fr;gap:16px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;min-height:120px}
+  .card h2{margin:0;padding:12px 14px;font-size:14px;border-bottom:1px solid var(--line);color:#cfe6ff}
+  .card .body{padding:12px}
+  .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  input[type="search"]{flex:1;min-width:120px;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:#0e1624;color:var(--fg)}
+  button{padding:9px 12px;border-radius:10px;border:1px solid var(--line);background:#0e1624;color:var(--fg);cursor:pointer}
+  button:hover{border-color:#34507a}
+  .pill{display:inline-block;padding:4px 8px;border-radius:999px;background:#0e1624;border:1px solid var(--line);font-size:12px}
+  .muted{color:var(--muted);font-size:12px}
+
+  /* LISTA VIRTUALIZADA */
+  .list-wrap{height:70vh;border:1px solid var(--line);border-radius:12px;background:#0e1624;position:relative;overflow:auto}
+  .spacer{height:0px}
+  .items{position:absolute;top:0;left:0;right:0}
+  .item{display:grid;grid-template-columns:44px 1fr auto;gap:10px;align-items:center;padding:10px;border:1px solid transparent;border-radius:12px;background:#0f1a2a;margin:6px 8px}
+  .item.active{border-color:var(--accent);box-shadow:0 0 0 2px color-mix(in oklab, var(--accent) 35%, transparent)}
+  .logo{width:44px;height:44px;border-radius:10px;object-fit:cover;background:#09101b;border:1px solid #172236;display:grid;place-items:center;font-size:18px}
+  .meta{display:flex;flex-direction:column}
+  .name{font-weight:700;font-size:14px}
+  .group{font-size:12px;color:var(--muted)}
+
+  .now{font-size:14px;color:#cde2cf}
+  .controls{display:flex;gap:10px;flex-wrap:wrap}
+  .controls .grow{flex:1}
+</style>
 </head>
+<body>
+<header>
+  <h1>📻 Bapp Radio</h1>
+  <div class="row">
+    <span class="pill">Auto: <strong>emisoras de radio.m3u</strong></span>
+    <span id="status" class="muted">Preparando…</span>
+  </div>
+</header>
 
-<body class="background__imagen">
-    <header class="navbar">
-        <nav class="navbar__nav">
-            <div class="">
-                <form action="index.html" method="get" class="navbar__nav__container__search">
-                    <img src="assets/Lupa.svg" alt="lupa de buscador">
-                    <input type="text" placeholder="Buscar artista, música..." name="q"
-                        class="navbar__nav__container__search__input">
-                </form>
-            </div>
-            <img src="assets/logo.svg" alt="logo del reproductor de música">
-            <Ul class="navbar__nav__list">
-                <li>Listas</li>
-                <li>Canciones</li>
-            </Ul>
-        </nav>
-    </header>
-    <main class="main">
-        <div class="main__container__reproductor">
-            <div class="main__reproductor">
-                <img src="https://api.institutoalfa.org/api/songs/image/7a8f30d89df98f5b7ce751cb37235c2b.jpg"
-                    alt="Cancion de Bedroom, llamada In my head" class="main__reproductor__image" id="image">
-                <div>
-                    <p class="main__reproductor__titulo" id="title-song">In My Head</p>
-                    <p class="main__reproductor__artista" id="author-song">Bedroom</p>
-                </div>
-                <div>
-                    <audio src="https://api.institutoalfa.org/api/songs/audio/2c8644707eb05222a2c3f183b0b00f7d.mp3"
-                        id="audio" autoplay >
-                    </audio>
-                </div>
-                <div class="reproductor__icon">
-                    <img src="assets/Corazon.svg" alt="Botón de favorito">
-                    <img src="assets/Atras.svg" alt="Botón para colocar la canción anterior">
-                    <img src="assets/Pausa.svg" alt="Botón de pausa" id="play">
-                    <img src="assets/Adelante.svg" alt="Botón para colocar la siguiente canción">
-                    <img src="assets/Repetir.svg" alt="Botón para repetir la canción">
-                </div>
-                <button class="main__main__reproductor__button">Compartir</button>
-            </div>
-        </div>
-        <section class="main__card__sections" id="container-song">
-        </section>
-    </main>
+<main>
+  <!-- Columna izquierda: búsqueda + listado (virtual) -->
+  <section class="card">
+    <h2>Listado de emisoras</h2>
+    <div class="body">
+      <div class="row" style="margin-bottom:10px">
+        <input id="q" type="search" placeholder="Buscar por nombre o grupo…" />
+        <button id="btnReset">Limpiar</button>
+      </div>
+      <div class="row" style="margin-bottom:10px">
+        <button id="btnOnlyFavs">👑 Solo favoritos</button>
+        <button id="btnAll">📚 Ver todo</button>
+        <div class="pill"><label><input id="toggleLogos" type="checkbox" checked /> Logos</label></div>
+        <div class="pill">Mostrando: <span id="count">0</span></div>
+        <div class="pill">Favoritos: <span id="favCount">0</span></div>
+      </div>
 
-    <script src="script.js"></script>
+      <!-- Lista virtualizada -->
+      <div id="listWrap" class="list-wrap" role="listbox" aria-label="Emisoras">
+        <div id="spacer" class="spacer"></div>
+        <div id="items" class="items"></div>
+      </div>
+
+      <div class="muted" style="margin-top:8px">Doble clic o Enter para reproducir · ⭐ para favoritos</div>
+    </div>
+  </section>
+
+  <!-- Columna derecha: reproductor + herramientas -->
+  <section class="card">
+    <h2>Reproductor</h2>
+    <div class="body">
+      <div class="now">Ahora suena: <strong id="nowName">—</strong> <span id="nowGroup" class="muted"></span></div>
+      <audio id="audio" controls preload="none"></audio>
+
+      <div class="controls" style="margin-top:10px">
+        <button id="btnPrev">⏮️ Anterior</button>
+        <button id="btnPlay">▶️ Reproducir</button>
+        <button id="btnPause">⏸️ Pausa</button>
+        <button id="btnStop">⏹️ Stop</button>
+        <button id="btnNext">⏭️ Siguiente</button>
+        <div class="grow"></div>
+        <label class="muted">Volumen <input id="vol" type="range" min="0" max="1" step="0.01" value="1" /></label>
+      </div>
+
+      <div class="row" style="margin-top:12px">
+        <button id="btnReload">🔄 Recargar</button>
+        <div class="grow"></div>
+        <button id="btnExportM3U">⬇️ Exportar favoritos .m3u</button>
+        <button id="btnExportJSON">⬇️ Exportar favoritos .json</button>
+      </div>
+
+      <div class="muted" style="margin-top:8px">HLS con <code>hls.js</code> si hace falta. Guarda volumen, última emisora y favoritos.</div>
+    </div>
+  </section>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<script>
+(() => {
+  const DEFAULT_PLAYLIST_URL = 'emisoras de radio.m3u'; // tu archivo
+  const BATCH_SIZE = 500;
+  const ITEM_HEIGHT = 72; // px (alto aprox de .item con márgenes)
+  const OVERSCAN = 6;     // ítems extra arriba/abajo
+
+  const LS_LAST_INDEX = 'bapp.radio.lastIndex';
+  const LS_FAVORITES  = 'bapp.radio.favorites';
+  const LS_VOLUME     = 'bapp.radio.volume';
+  const LS_LOGOS      = 'bapp.radio.showLogos';
+
+  // DOM
+  const $status   = document.getElementById('status');
+  const $q        = document.getElementById('q');
+  const $btnReset = document.getElementById('btnReset');
+  const $btnOnlyFavs = document.getElementById('btnOnlyFavs');
+  const $btnAll   = document.getElementById('btnAll');
+  const $toggleLogos = document.getElementById('toggleLogos');
+  const $count    = document.getElementById('count');
+  const $favCount = document.getElementById('favCount');
+
+  const $listWrap = document.getElementById('listWrap');
+  const $spacer   = document.getElementById('spacer');
+  const $items    = document.getElementById('items');
+
+  const $audio    = document.getElementById('audio');
+  const $nowName  = document.getElementById('nowName');
+  const $nowGroup = document.getElementById('nowGroup');
+
+  const $btnPlay  = document.getElementById('btnPlay');
+  const $btnPause = document.getElementById('btnPause');
+  const $btnStop  = document.getElementById('btnStop');
+  const $btnPrev  = document.getElementById('btnPrev');
+  const $btnNext  = document.getElementById('btnNext');
+  const $btnReload = document.getElementById('btnReload');
+
+  const $btnExportM3U = document.getElementById('btnExportM3U');
+  const $btnExportJSON= document.getElementById('btnExportJSON');
+  const $vol      = document.getElementById('vol');
+
+  // Estado
+  let stations = [];           // {name,url,logo,group, nameL, groupL}
+  let filteredIdx = [];        // índices (sobre stations) tras filtro
+  let onlyFavs = false;
+  let showLogos = true;
+  let currentFilteredPos = -1; // posición dentro de filteredIdx
+  let hls = null;
+
+  const favorites = new Set(JSON.parse(localStorage.getItem(LS_FAVORITES) || '[]'));
+  updateFavCount();
+
+  // ---------- Utils ----------
+  function encodeUrlMaybe(u){
+    try {
+      const abs = new URL(u, window.location.href);
+      if (/^https?:/i.test(abs.protocol)) return abs.href;
+    } catch(_) {}
+    return encodeURI(u);
+  }
+  function isFav(url){ return favorites.has(url); }
+  function toggleFav(url){
+    if(isFav(url)) favorites.delete(url); else favorites.add(url);
+    localStorage.setItem(LS_FAVORITES, JSON.stringify([...favorites]));
+    updateFavCount();
+    // si estamos filtrando por favoritos, re-aplicar filtro
+    if(onlyFavs) applyFilterDebounced();
+  }
+  function updateFavCount(){ $favCount.textContent = favorites.size; }
+
+  function guessNameFromUrl(u){
+    try {
+      const p = new URL(u, window.location.href);
+      const last = p.pathname.split('/').filter(Boolean).pop() || p.host;
+      return decodeURIComponent((last || '').replace(/\.[a-z0-9]+$/i,'')).replace(/[_\-]+/g,' ').trim() || p.host;
+    } catch {
+      return u;
+    }
+  }
+
+  // ---------- Worker (stream parser) ----------
+  const workerSrc = `
+    self.onmessage = async (e) => {
+      const { url, batchSize } = e.data;
+      try{
+        const res = await fetch(url, { cache: 'no-store' });
+        if(!res.ok) throw new Error('HTTP ' + res.status);
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder();
+        let { value, done } = await reader.read();
+        let buf = value ? decoder.decode(value, {stream:true}) : '';
+        let out = [];
+        let pending = null;
+        const attrRe = /([\\w-]+)="([^"]*)"/g;
+
+        function pushStation(name, url, logo, group){
+          out.push({ name, url, logo, group });
+          if(out.length >= batchSize){
+            self.postMessage({ type:'batch', items: out });
+            out = [];
+          }
+        }
+
+        function guessNameFromUrl(u){
+          try{
+            const p = new URL(u, location.href);
+            const last = p.pathname.split('/').filter(Boolean).pop() || p.host;
+            return decodeURIComponent((last || '').replace(/\\.[a-z0-9]+$/i,'')).replace(/[_\\-]+/g,' ').trim() || p.host;
+          }catch{
+            return u;
+          }
+        }
+
+        function processLines(chunk){
+          const lines = chunk.split(/\\r?\\n/);
+          // última línea puede quedar incompleta, devolverla
+          const lastLine = lines.pop();
+          for(const lineRaw of lines){
+            const line = lineRaw.trim();
+            if(!line || line.startsWith('#EXTM3U')) continue;
+            if(line.startsWith('#EXTINF')){
+              const commaIdx = line.indexOf(',');
+              const head = commaIdx>=0 ? line.slice(0, commaIdx) : line;
+              const displayName = commaIdx>=0 ? line.slice(commaIdx+1).trim() : '';
+              const attrs = {};
+              let m; while((m = attrRe.exec(head))){ attrs[m[1]] = m[2]; }
+              pending = {
+                name: (attrs['tvg-name'] || displayName || '').trim(),
+                logo: (attrs['tvg-logo'] || attrs['logo'] || '').trim(),
+                group: (attrs['group-title'] || '').trim()
+              };
+            } else if(line.startsWith('#')){
+              // ignore
+            } else {
+              const url = line;
+              const name = (pending && pending.name) ? pending.name : guessNameFromUrl(url);
+              const logo = pending && pending.logo ? pending.logo : '';
+              const group = pending && pending.group ? pending.group : '';
+              pushStation(name, url, logo, group);
+              pending = null;
+            }
+          }
+          return lastLine || '';
+        }
+
+        while(!done){
+          buf = processLines(buf);
+          ({ value, done } = await reader.read());
+          if(value){
+            buf += decoder.decode(value, {stream:true});
+          }
+        }
+        // flush final
+        buf = processLines(buf);
+        if(buf.trim() && !buf.trim().startsWith('#')){
+          // si quedara una URL sola
+          const urlLine = buf.trim();
+          const name = guessNameFromUrl(urlLine);
+          pushStation(name, urlLine, '', '');
+        }
+        if(out.length) self.postMessage({ type:'batch', items: out });
+        self.postMessage({ type:'done' });
+      }catch(err){
+        self.postMessage({ type:'error', message: String(err) });
+      }
+    };
+  `;
+  const worker = new Worker(URL.createObjectURL(new Blob([workerSrc], {type:'application/javascript'})));
+
+  worker.onmessage = (e) => {
+    const { type } = e.data;
+    if(type === 'batch'){
+      const items = e.data.items.map(s => ({
+        ...s,
+        name: s.name || guessNameFromUrl(s.url),
+        nameL: (s.name || '').toLowerCase(),
+        groupL: (s.group || '').toLowerCase(),
+      }));
+      stations.push(...items);
+      $status.textContent = `Cargadas ${stations.length}…`;
+      // mantener filtro actualizado progresivamente
+      appendToFilter(items.length);
+    } else if(type === 'done'){
+      $status.textContent = `Listo: ${stations.length} emisoras`;
+      finalizeFilter();
+      restoreLast();
+    } else if(type === 'error'){
+      alert('Error al cargar/parsing M3U: ' + e.data.message);
+      $status.textContent = 'Error';
+    }
+  };
+
+  // ---------- Filtro + lista virtual ----------
+  function computeFilteredIndices(){
+    const q = $q.value.toLowerCase().trim();
+    const out = [];
+    for(let i=0;i<stations.length;i++){
+      const s = stations[i];
+      if(onlyFavs && !isFav(s.url)) continue;
+      if(!q || s.nameL.includes(q) || s.groupL.includes(q)){
+        out.push(i);
+      }
+    }
+    return out;
+  }
+
+  function appendToFilter(addedCount){
+    // cuando llegan batches, añadimos rápidamente a filtered según lo actual
+    const q = $q.value.toLowerCase().trim();
+    const start = stations.length - addedCount;
+    for(let i=start;i<stations.length;i++){
+      const s = stations[i];
+      if(onlyFavs && !isFav(s.url)) continue;
+      if(!q || s.nameL.includes(q) || s.groupL.includes(q)){
+        filteredIdx.push(i);
+      }
+    }
+    $count.textContent = filteredIdx.length;
+    updateVirtual();
+  }
+
+  function finalizeFilter(){
+    // asegurar consistencia (p.ej. si se cambió filtro durante la carga)
+    filteredIdx = computeFilteredIndices();
+    $count.textContent = filteredIdx.length;
+    updateVirtual(true);
+  }
+
+  const applyFilterDebounced = debounce(() => {
+    filteredIdx = computeFilteredIndices();
+    $count.textContent = filteredIdx.length;
+    currentFilteredPos = Math.min(currentFilteredPos, filteredIdx.length-1);
+    updateVirtual(true);
+  }, 150);
+
+  function debounce(fn, wait){
+    let t; return (...args)=>{ clearTimeout(t); t=setTimeout(()=>fn(...args), wait); };
+  }
+
+  function updateVirtual(resetScroll=false){
+    const total = filteredIdx.length;
+    $spacer.style.height = (total * ITEM_HEIGHT) + 'px';
+
+    const scrollTop = $listWrap.scrollTop;
+    const viewHeight = $listWrap.clientHeight;
+
+    let start = Math.floor(scrollTop / ITEM_HEIGHT) - OVERSCAN;
+    start = Math.max(0, start);
+    let end = Math.ceil((scrollTop + viewHeight) / ITEM_HEIGHT) + OVERSCAN;
+    end = Math.min(total, end);
+
+    const frag = document.createDocumentFragment();
+    for(let i=start;i<end;i++){
+      const idx = filteredIdx[i];
+      const el = makeItem(idx);
+      el.style.position = 'absolute';
+      el.style.top = (i * ITEM_HEIGHT + 4) + 'px'; // +4 por margen visual
+      el.dataset.pos = String(i);
+      frag.appendChild(el);
+    }
+    $items.innerHTML = '';
+    $items.appendChild(frag);
+
+    if(resetScroll){ $listWrap.scrollTop = 0; }
+    highlightActive();
+  }
+
+  $listWrap.addEventListener('scroll', () => {
+    // actualizar vista sin bloquear la UI
+    requestAnimationFrame(()=>updateVirtual(false));
+  });
+
+  function logoElem(s){
+    if(!showLogos || !s.logo){
+      const div = document.createElement('div');
+      div.className = 'logo';
+      div.textContent = '📻';
+      return div;
+    }
+    const img = document.createElement('img');
+    img.className = 'logo';
+    img.src = s.logo;
+    img.alt = 'Logo';
+    img.referrerPolicy = 'no-referrer';
+    img.loading = 'lazy';
+    img.onerror = () => { img.replaceWith(fallbackLogo()); };
+    return img;
+  }
+  function fallbackLogo(){
+    const div = document.createElement('div');
+    div.className = 'logo';
+    div.textContent = '📻';
+    return div;
+  }
+
+  function makeItem(absIndex){
+    const s = stations[absIndex];
+    const li = document.createElement('div');
+    li.className = 'item';
+    li.tabIndex = 0;
+    li.role = 'option';
+    li.dataset.index = String(absIndex);
+
+    const logo = logoElem(s);
+    const meta = document.createElement('div'); meta.className = 'meta';
+    const name = document.createElement('div'); name.className='name'; name.textContent = s.name || '(Sin nombre)';
+    const group = document.createElement('div'); group.className='group'; group.textContent = s.group || '—';
+    meta.appendChild(name); meta.appendChild(group);
+
+    const favBtn = document.createElement('button');
+    favBtn.className = 'fav';
+    favBtn.title = 'Agregar/Quitar de favoritos';
+    favBtn.textContent = isFav(s.url) ? '⭐' : '☆';
+    favBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleFav(s.url);
+      favBtn.textContent = isFav(s.url) ? '⭐' : '☆';
+      li.classList.toggle('favItem', isFav(s.url));
+    });
+
+    li.appendChild(logo);
+    li.appendChild(meta);
+    li.appendChild(favBtn);
+
+    li.addEventListener('click', () => playByAbsoluteIndex(absIndex));
+    li.addEventListener('dblclick', () => playByAbsoluteIndex(absIndex));
+    li.addEventListener('keydown', (ev) => { if(ev.key==='Enter') playByAbsoluteIndex(absIndex); });
+
+    // marcar activo
+    const pos = Number(li.dataset.pos);
+    if(pos === currentFilteredPos) li.classList.add('active');
+
+    return li;
+  }
+
+  function highlightActive(){
+    const children = [...$items.children];
+    children.forEach(c => c.classList.remove('active'));
+    if(currentFilteredPos >= 0){
+      const el = children.find(c => Number(c.dataset.pos) === currentFilteredPos);
+      if(el) el.classList.add('active');
+    }
+  }
+
+  // ---------- Reproductor ----------
+  function setNow(s){
+    $nowName.textContent = s.name || '—';
+    $nowGroup.textContent = s.group ? `· ${s.group}` : '';
+  }
+
+  function cleanupHls(){
+    if(hls){ try{ hls.destroy(); }catch(_){}
+      hls=null;
+    }
+  }
+
+  function playByAbsoluteIndex(absIndex){
+    const s = stations[absIndex]; if(!s) return;
+    currentFilteredPos = filteredIdx.indexOf(absIndex);
+    setNow(s);
+    highlightActive();
+    localStorage.setItem(LS_LAST_INDEX, String(absIndex));
+
+    $audio.pause();
+    $audio.removeAttribute('src');
+    cleanupHls();
+
+    const url = encodeUrlMaybe(s.url);
+    if(url.endsWith('.m3u8')){
+      if(Hls.isSupported()){
+        hls = new Hls({enableWorker:true, lowLatencyMode:true});
+        hls.loadSource(url);
+        hls.attachMedia($audio);
+        hls.on(Hls.Events.MANIFEST_PARSED, () => { $audio.play().catch(()=>{}); });
+        hls.on(Hls.Events.ERROR, (_, data) => {
+          if(data.fatal){
+            cleanupHls();
+            $audio.src = url;
+            $audio.play().catch(()=>{});
+          }
+        });
+      } else {
+        $audio.src = url;
+        $audio.play().catch(()=>{});
+      }
+    } else {
+      $audio.src = url;
+      $audio.play().catch(()=>{});
+    }
+  }
+
+  // ---------- Restaurar última ----------
+  function restoreLast(){
+    const savedAbs = Number(localStorage.getItem(LS_LAST_INDEX));
+    if(Number.isFinite(savedAbs)){
+      const pos = filteredIdx.indexOf(savedAbs);
+      if(pos !== -1){
+        currentFilteredPos = pos;
+        playByAbsoluteIndex(savedAbs);
+        // scroll hacia ese elemento
+        const y = pos * ITEM_HEIGHT - 8;
+        $listWrap.scrollTop = Math.max(0, y);
+        return;
+      }
+    }
+    if(filteredIdx.length){
+      currentFilteredPos = 0;
+      playByAbsoluteIndex(filteredIdx[0]);
+    }
+  }
+
+  // ---------- Export favoritos ----------
+  function exportM3U(){
+    const lines = ['#EXTM3U'];
+    for(const url of favorites){
+      const s = stations.find(st => st.url === url);
+      if(!s) continue;
+      const name = s.name || 'Radio';
+      const logo = s.logo ? ` tvg-logo="${s.logo.replace(/"/g,'')}"` : '';
+      const group = s.group ? ` group-title="${s.group.replace(/"/g,'')}"` : '';
+      lines.push(`#EXTINF:-1${logo}${group},${name}`);
+      lines.push(s.url);
+    }
+    downloadBlob(lines.join('\n'), 'favoritos.m3u', 'audio/x-mpegurl');
+  }
+  function exportJSON(){
+    const out = [];
+    for(const url of favorites){
+      const s = stations.find(st => st.url === url);
+      if(s) out.push({ name:s.name, url:s.url, logo:s.logo, group:s.group });
+    }
+    downloadBlob(JSON.stringify(out, null, 2), 'favoritos.json', 'application/json');
+  }
+  function downloadBlob(text, filename, mime){
+    const blob = new Blob([text], {type: mime});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 0);
+  }
+
+  // ---------- Controles ----------
+  $btnPlay.addEventListener('click', () => $audio.play().catch(()=>{}));
+  $btnPause.addEventListener('click', () => $audio.pause());
+  $btnStop.addEventListener('click', () => { $audio.pause(); $audio.currentTime = 0; });
+
+  $btnPrev.addEventListener('click', () => {
+    if(!filteredIdx.length) return;
+    currentFilteredPos = (currentFilteredPos - 1 + filteredIdx.length) % filteredIdx.length;
+    playByAbsoluteIndex(filteredIdx[currentFilteredPos]);
+  });
+  $btnNext.addEventListener('click', () => {
+    if(!filteredIdx.length) return;
+    currentFilteredPos = (currentFilteredPos + 1) % filteredIdx.length;
+    playByAbsoluteIndex(filteredIdx[currentFilteredPos]);
+  });
+
+  $vol.addEventListener('input', () => { $audio.volume = Number($vol.value); localStorage.setItem(LS_VOLUME, String($audio.volume)); });
+
+  $q.addEventListener('input', applyFilterDebounced);
+  $btnReset.addEventListener('click', () => { $q.value=''; applyFilterDebounced(); });
+
+  $btnOnlyFavs.addEventListener('click', () => { onlyFavs = true; applyFilterDebounced(); });
+  $btnAll.addEventListener('click', () => { onlyFavs = false; applyFilterDebounced(); });
+  $btnReload.addEventListener('click', () => { startLoad(); });
+
+  $btnExportM3U.addEventListener('click', exportM3U);
+  $btnExportJSON.addEventListener('click', exportJSON);
+
+  $toggleLogos.addEventListener('change', () => {
+    showLogos = $toggleLogos.checked;
+    localStorage.setItem(LS_LOGOS, showLogos ? '1':'0');
+    updateVirtual();
+  });
+
+  // ---------- Inicio ----------
+  function startLoad(){
+    stations = [];
+    filteredIdx = [];
+    currentFilteredPos = -1;
+    $items.innerHTML = '';
+    $spacer.style.height = '0px';
+    $count.textContent = '0';
+    $status.textContent = 'Cargando…';
+
+    const src = encodeUrlMaybe(DEFAULT_PLAYLIST_URL);
+    worker.postMessage({ url: src, batchSize: BATCH_SIZE });
+  }
+
+  // volumen/logos previos
+  const vPrev = Number(localStorage.getItem(LS_VOLUME));
+  if(Number.isFinite(vPrev)){ $audio.volume = vPrev; $vol.value = vPrev; }
+  const logosPrev = localStorage.getItem(LS_LOGOS);
+  if(logosPrev !== null){ showLogos = logosPrev === '1'; $toggleLogos.checked = showLogos; }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    startLoad();
+  });
+})();
+</script>
 </body>
-
 </html>
